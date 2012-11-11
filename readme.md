@@ -14,6 +14,11 @@ A windows installer is available from the downlod site, grab it here:
 
 ![Logo](https://raw.github.com/fbergmann/FluxBalance/master/images/fba_icon.png) 
 
+##Previous Versions
+The [first version](http://frank-fbergmann.blogspot.com/2009/03/fluxbalance-analysis-with-sbw.html) of the tool is still available from my [blog](http://frank-fbergmann.blogspot.com/), but essentially superceded by this project. 
+
+
+
 <div style="float: right"><img src="https://raw.github.com/fbergmann/FluxBalance/master/images/sbml-logo-70.jpg" /></div>
 ![PoweredBySBW](https://raw.github.com/fbergmann/FluxBalance/master/images/SBW%20Logo-transparent.png) 
  
