@@ -10,7 +10,7 @@ With the latest [SBW version](http://128.208.17.26/fbergman/files/latest/SetupSB
 ##Download
 A windows installer is available from the downlod site, grab it here: 
 
-* <https://raw.github.com/fbergmann/FluxBalance/releases/SetupFBA-1.7.exe> (import of COBRA annotations, re-designed LP generation, so it will work for *large* models.)
+* <https://github.com/fbergmann/FluxBalance/raw/master/releases/SetupFBA-1.7.exe> (import of COBRA annotations, re-designed LP generation, so it will work for *large* models.)
 
 ![Logo](https://raw.github.com/fbergmann/FluxBalance/master/images/fba_icon.png) 
 
