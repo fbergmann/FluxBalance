@@ -10,13 +10,14 @@ With the latest [SBW version](http://128.208.17.26/fbergman/files/latest/SetupSB
 ##Download
 A windows installer is available from the downlod site, grab it here: 
 
-* <https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.5.exe> (fixes issues with L3 package annotations in L2 models)
+* <https://raw.github.com/fbergmann/FluxBalance/releases/SetupFBA-1.7.exe> (import of COBRA annotations, re-designed LP generation, so it will work for *large* models.)
 
 ![Logo](https://raw.github.com/fbergmann/FluxBalance/master/images/fba_icon.png) 
 
 ##Previous Versions
-The [Version 1.4](https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.4.exe), fixed issues with import from L2 annotation of FAME!
-[Version 1.3](https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.3.exe), the first version from github is still available!
+[Version 1.5](https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.5.exe), fixed issues with L3 package annotations in L2 models.  
+The [Version 1.4](https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.4.exe), fixed issues with import from L2 annotation of FAME!  
+[Version 1.3](https://github.com/downloads/fbergmann/FluxBalance/SetupFBA-1.3.exe), the first version from github is still available!  
 The [first version](http://frank-fbergmann.blogspot.com/2009/03/fluxbalance-analysis-with-sbw.html) of the tool is still available from my [blog](http://frank-fbergmann.blogspot.com/), but essentially superceded by this project. 
 
 
