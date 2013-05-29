@@ -25,6 +25,8 @@ The [first version](http://frank-fbergmann.blogspot.com/2009/03/fluxbalance-anal
 ![PoweredBySBW](https://raw.github.com/fbergmann/FluxBalance/master/images/sbml-logo-70.jpg) 
  
 ## License
+This project is open source and freely available under the [Simplified BSD](http://opensource.org/licenses/BSD-2-Clause) license. Should that license not meet your needs, please contact me. 
+
 Copyright (c) 2013, Frank T. Bergmann  
 All rights reserved.
 
