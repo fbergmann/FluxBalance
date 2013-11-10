@@ -10,6 +10,8 @@ With the latest [SBW version](http://128.208.17.26/fbergman/files/latest/SetupSB
 ##Download
 Github no longer supports binary releases. So starting with 1.8 they will be available from [SourceForge](https://sourceforge.net/projects/sbw/upload/modules/FluxBalance/). The current version is:  
 
+* Version 1.9: <http://sourceforge.net/projects/sbw/files/modules/FluxBalance/SetupFBA-1.9.exe/download> (Corrected SBW export, added menu item, to allow to send L2 or L3 models to SBW).
+
 * Version 1.8: <http://sourceforge.net/projects/sbw/files/modules/FluxBalance/SetupFBA-1.8.exe/download> (New is additional export of SBML Level 2 Models using either FBA or COBRA annotations).
 
 
