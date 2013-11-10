@@ -1,1 +1,1 @@
-"c:\Program Files\NSIS\makensis.exe" NSIS-FBA.nsi 
+"%ProgramFiles%\NSIS\makensis.exe" NSIS-FBA.nsi 

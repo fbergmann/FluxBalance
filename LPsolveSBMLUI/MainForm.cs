@@ -29,8 +29,8 @@ namespace LPsolveSBMLUI
             InitializeComponent();
 
             sbwMenu = new SBWMenu(sBWToolStripMenuItem, "FluxBalance",
-                () => SBMLLayout.Instance.writeSBML());
-            sbwFavs = new SBWFavorites(() => SBMLLayout.Instance.writeSBML(), toolStrip1);
+                () => _FluxBalance.WriteSBML(!toolExportL2.Checked));
+            sbwFavs = new SBWFavorites(() => _FluxBalance.WriteSBML(!toolExportL2.Checked), toolStrip1);
         }
 
         public LPsolveSolution LastResult { get; set; }
