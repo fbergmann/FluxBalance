@@ -413,10 +413,21 @@ namespace LPsolveSBMLUI
 
         private void OpenFile()
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            try
             {
-                LoadSBMLFile(openFileDialog1.FileName);
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    LoadSBMLFile(openFileDialog1.FileName);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this,
+                    string.Format("A fatal error occured trying to load the model, the error message is: {0}",
+                        ex.Message),
+                    "Could not load model.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
         }
 
         private void PrintImage()
