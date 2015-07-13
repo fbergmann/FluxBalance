@@ -394,12 +394,14 @@ namespace LPsolveSBMLUI
                         _FluxBalance.WriteLPToFile(fileName);
                     else
                     {
-                        if (saveDialog.FilterIndex == 2)
+                        if (saveDialog.FilterIndex == 3)
                             File.WriteAllText(fileName, _FluxBalance.WriteAsAnnotation());
-                        else if (saveDialog.FilterIndex == 3)
+                        else if (saveDialog.FilterIndex == 4)
                             File.WriteAllText(fileName, _FluxBalance.WriteAsCobraAnnotation());
+                        else if (saveDialog.FilterIndex == 2)
+                          _FluxBalance.WriteToFile(fileName, true, 2);
                         else
-                            _FluxBalance.WriteToFile(fileName);
+                          _FluxBalance.WriteToFile(fileName);
                     }
                 }
             }
@@ -456,6 +458,13 @@ namespace LPsolveSBMLUI
             reactionTextTable = new Hashtable();
 
             _FluxBalance = new FluxBalance(SBML);
+
+            if (_FluxBalance.Warnings.Count > 0)
+            {
+              MessageBox.Show(this,
+                  _FluxBalance.Warnings[0],
+                  "Warnings occured...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
 
             if (_FluxBalance.IsEmpty)
             {

@@ -29,6 +29,8 @@ namespace LPsolveSBML
 
     public Dictionary<string, bool> ReversibilityMap { get; set; }
 
+    public List<string> Warnings {  get; set; }
+
     /// <summary>
     /// Initializes a new instance of the FluxBalance class.
     /// </summary>
@@ -37,6 +39,7 @@ namespace LPsolveSBML
       ReversibilityMap = new Dictionary<string, bool>();
       Constraints = new List<LPsolveConstraint>();
       Objectives = new List<LPsolveObjective>();
+      Warnings = new List<string>();
       Mode = FBA_Mode.maximize;
       PreferDual = true;
       PrintDebug = false;
@@ -79,12 +82,8 @@ namespace LPsolveSBML
 
     public string ActiveObjective { get; set; }
 
-    private void InitializeFromSBMLDocument(SBMLDocument doc)
+    private void InitializeFromFbcV1(Model model, FbcModelPlugin plugin)
     {
-      var model = doc.getModel();
-      var plugin = (FbcModelPlugin) model.getPlugin("fbc");
-      if (plugin == null) return;
-
       var numConstraints = plugin.getNumFluxBounds();
       for (int i = 0; i < numConstraints; i++)
       {
@@ -96,7 +95,7 @@ namespace LPsolveSBML
       if (activeObjective == null && plugin.getNumObjectives() > 0)
         activeObjective = plugin.getObjective(0);
       if (activeObjective == null) return;
-      var numObjectives = (int) activeObjective.getNumFluxObjectives();
+      var numObjectives = (int)activeObjective.getNumFluxObjectives();
       for (int i = 0; i < numObjectives; i++)
       {
         var objective = activeObjective.getFluxObjective(i);
@@ -111,6 +110,91 @@ namespace LPsolveSBML
       {
         var reaction = model.getReaction(i);
         ReversibilityMap[reaction.getId()] = reaction.getReversible();
+      }
+    }
+
+    private void InitializeFromFbcV2(Model model, FbcModelPlugin plugin)
+    {
+      if (!plugin.getStrict())
+      {
+        Warnings.Add(
+          "Encountered non-strict model, this software does not support any of the dynamic features of FBC V2, only the static features of the model are imported. ");
+      }
+
+      var numConstraints = plugin.getNumFluxBounds();
+      for (int i = 0; i < numConstraints; i++)
+      {
+        var constraint = plugin.getFluxBound(i);
+        Constraints.Add(new LPsolveConstraint(constraint.getReaction(), GetOperator(constraint.getOperation()),
+          constraint.getValue()));
+      }
+
+      var activeObjective = plugin.getActiveObjective();
+      if (activeObjective == null && plugin.getNumObjectives() > 0)
+        activeObjective = plugin.getObjective(0);
+      if (activeObjective == null) return;
+      var numObjectives = (int)activeObjective.getNumFluxObjectives();
+      for (int i = 0; i < numObjectives; i++)
+      {
+        var objective = activeObjective.getFluxObjective(i);
+        Objectives.Add(new LPsolveObjective(objective.getReaction(), objective.getCoefficient()));
+      }
+
+      if (activeObjective.getType() == "minimize" || activeObjective.getType() == "minimise") Mode = FBA_Mode.minimize;
+      else Mode = FBA_Mode.maximize;
+      ActiveObjective = activeObjective.getId();
+
+      for (int i = 0; i < model.getNumReactions(); i++)
+      {
+        var reaction = model.getReaction(i);
+        ReversibilityMap[reaction.getId()] = reaction.getReversible();
+
+        var rplug = (FbcReactionPlugin) reaction.getPlugin("fbc");
+        if (rplug == null) continue;
+
+        if (rplug.isSetLowerFluxBound())
+        {
+          var param = model.getParameter(rplug.getLowerFluxBound());
+          if (param != null)
+          {
+            Constraints.Add(new LPsolveConstraint(reaction.getId(), lpsolve_constr_types.GE,
+          param.getValue()));
+          }
+        }
+
+        if (rplug.isSetUpperFluxBound())
+        {
+          var param = model.getParameter(rplug.getUpperFluxBound());
+          if (param != null)
+          {
+            Constraints.Add(new LPsolveConstraint(reaction.getId(), lpsolve_constr_types.LE,
+          param.getValue()));
+          }
+        }
+
+
+    }
+    }
+
+    private void InitializeFromSBMLDocument(SBMLDocument doc)
+    {
+      var model = doc.getModel();
+      var plugin = (FbcModelPlugin)model.getPlugin("fbc");
+      if (plugin == null) return;
+
+      long packageVersion = plugin.getPackageVersion();
+      if (packageVersion == 1)
+      {
+        InitializeFromFbcV1(model, plugin);
+      }
+      else if (packageVersion == 2)
+      {
+        InitializeFromFbcV2(model, plugin);
+      }
+      else
+      {
+        throw new Exception(
+          "Unknown package version encountered, currently only support for FBC V1 and V2 have been added. Please check for a newer version of this tool. ");
       }
     }
 
@@ -489,12 +573,24 @@ namespace LPsolveSBML
       // convert to COBRA
       var props = new ConversionProperties();
       props.addOption("convert fbc to cobra", true, "Convert FBC model to Cobra model");
-      doc.convert(props);
+      if (doc.convert(props) != libsbml.LIBSBML_OPERATION_SUCCESS)
+      {
+        throw new Exception(doc.getErrorLog().toString());
+      }
 
+      model = doc.getModel();
+      plugin = (FbcModelPlugin)model.getPlugin("fbc");
+      if (plugin != null)
+      {
+        plugin.getListOfGeneProducts().clear();
+        plugin.getListOfGeneAssociations().clear();
+        plugin.getListOfFluxBounds().clear();
+        plugin.getListOfObjectives().clear();
+      }
       return libsbml.writeSBMLToString(doc);
     }
 
-    private string WriteUsingFBC()
+    private string WriteUsingFBC(int version = 1)
     {
       var doc = libsbml.readSBMLFromString(SBML);
       var model = doc.getModel();
@@ -506,7 +602,20 @@ namespace LPsolveSBML
         properties.addOption("ignorePackages", true);
         doc.convert(properties);
       }
-      doc.enablePackage(FbcExtension.getXmlnsL3V1V1(), "fbc", true);
+
+      if (version == 1)
+      {
+        doc.enablePackage(FbcExtension.getXmlnsL3V1V2(), "fbc", false);
+        doc.enablePackage(FbcExtension.getXmlnsL3V1V1(), "fbc", true);
+      }
+      else if (version == 2)
+      {
+        doc.enablePackage(FbcExtension.getXmlnsL3V1V1(), "fbc", false);
+        doc.enablePackage(FbcExtension.getXmlnsL3V1V2(), "fbc", true);
+      }
+
+      doc.setPackageRequired("fbc", false);
+
       var plugin = (FbcModelPlugin)model.getPlugin("fbc");
       if (plugin == null)
       {
@@ -516,14 +625,73 @@ namespace LPsolveSBML
       plugin.getListOfFluxBounds().clear();
       plugin.getListOfGeneAssociations().clear();
       plugin.getListOfObjectives().clear();
+      plugin.getListOfGeneProducts().clear();
 
-      foreach (var constraint in Constraints)
+      if (version == 1)
       {
-        var bound = plugin.createFluxBound();
-        bound.setReaction(constraint.Id);
-        bound.setOperation(ToFbcString(constraint.Operator));
-        bound.setValue(constraint.Value);
+        plugin.unsetStrict();
+        foreach (var constraint in Constraints)
+        {
+          var bound = plugin.createFluxBound();
+          bound.setReaction(constraint.Id);
+          bound.setOperation(ToFbcString(constraint.Operator));
+          bound.setValue(constraint.Value);
+        }
       }
+      else
+      {
+
+        plugin.setStrict(false);
+
+        foreach (var constraint in Constraints)
+        {
+          var reaction = model.getReaction(constraint.Id);
+          if (reaction == null) continue;
+          var rplug = (FbcReactionPlugin)reaction.getPlugin("fbc");
+          if (rplug == null) continue;
+
+          switch (constraint.Operator)
+          {
+            case lpsolve_constr_types.LE:
+              {
+                var param = model.createParameter();
+                param.setId(string.Format("fb_{0}_ub", reaction.getId()));
+                param.setConstant(true);
+                param.setValue(constraint.Value);
+                rplug.setUpperFluxBound(param.getId());
+              }
+              break;
+            case lpsolve_constr_types.EQ:
+              {
+                var param = model.createParameter();
+                param.setId(string.Format("fb_{0}_ub", reaction.getId()));
+                param.setConstant(true);
+                param.setValue(constraint.Value);
+                rplug.setUpperFluxBound(param.getId());
+
+                param = model.createParameter();
+                param.setId(string.Format("fb_{0}_lb", reaction.getId()));
+                param.setConstant(true);
+                param.setValue(constraint.Value);
+                rplug.setLowerFluxBound(param.getId());
+              }
+              break;
+            case lpsolve_constr_types.GE:
+              {
+                var param = model.createParameter();
+                param.setId(string.Format("fb_{0}_lb", reaction.getId()));
+                param.setConstant(true);
+                param.setValue(constraint.Value);
+                rplug.setLowerFluxBound(param.getId());
+              }
+              break;
+            default:
+              break;
+          }
+
+        }
+      }
+
 
       var active = plugin.createObjective();
       active.setId("objective1");
@@ -542,16 +710,16 @@ namespace LPsolveSBML
       return libsbml.writeSBMLToString(doc);
     }
 
-    public string WriteSBML(bool useFbc = true)
+    public string WriteSBML(bool useFbc = true, int version = 1)
     {
       if (useFbc)
-        return WriteUsingFBC();
+        return WriteUsingFBC(version);
       return WriteAsAnnotation();
     }
 
-    public void WriteToFile(string fileName)
+    public void WriteToFile(string fileName, bool useFbc = true, int version = 1)
     {
-      File.WriteAllText(fileName, WriteSBML());
+      File.WriteAllText(fileName, WriteSBML(useFbc, version));
     }
 
     public void WriteLPToFile(string fileName)

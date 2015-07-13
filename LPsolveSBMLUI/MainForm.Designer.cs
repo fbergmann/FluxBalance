@@ -320,7 +320,7 @@
       // 
       // saveDialog
       // 
-      this.saveDialog.Filter = "SBML files|*.xml;*.sbml|SBML Level 2 with FBA annotation|*.xml|SBML Level 2 with " +
+      this.saveDialog.Filter = "SBML files|*.xml;*.sbml|SBML Level 3 Version 1 with FBC Version 2|*.xml|SBML Level 2 with FBA annotation|*.xml|SBML Level 2 with " +
     "COBRA annotation|*.xml|LP files|*.lp|All files|*.*";
       this.saveDialog.Title = "Export SBML / LP file";
       // 
