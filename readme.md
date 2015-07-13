@@ -8,7 +8,9 @@ The program uses [LPsolve](http://lpsolve.sourceforge.net) as solver, and can so
 With the latest [SBW version](http://128.208.17.26/fbergman/files/latest/SetupSBW.exe) installed, the program also allows to import Jarnac or [COPASI](http://copasi.org) files!
 
 ##Download
-Github no longer supports binary releases. So starting with 1.8 they will be available from [SourceForge](https://sourceforge.net/projects/sbw/upload/modules/FluxBalance/). The current version is:  
+Github again supports binary releases, so you find releases right in the github releases menu. Alternatively, they will be available from [SourceForge](https://sourceforge.net/projects/sbw/upload/modules/FluxBalance/). The current version is:  
+
+* version 1.10: <http://sourceforge.net/projects/sbw/files/modules/FluxBalance/SetupFBA-1.10.exe/download> (support for FBC V2)
 
 * Version 1.9: <http://sourceforge.net/projects/sbw/files/modules/FluxBalance/SetupFBA-1.9.exe/download> (Corrected SBW export, added menu item, to allow to send L2 or L3 models to SBW).
 
